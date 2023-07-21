@@ -1,0 +1,48 @@
+disable worlds:
+  - none
+
+Teleport:
+  death: true
+  join: true
+  fall: true
+  title: ""
+  subtitle: ""
+
+Death:
+  auto respawn: false
+  title: "&4✘ Ｄｅａｔｈ! ✘"
+  subtitle: "&f▶ &7Вы были убиты &c$killer&7!"
+
+Prevent death:
+
+  enable: true
+
+  Rebirth:
+    # Enable the option for disable respawn wait time.
+    enable: true
+    # Rebirth gamemode
+    pre-gamemode: SPECTATOR
+    # Respawn gamemode
+    post-gamemode: ADVENTURE
+    # cancel player teleport if gamemode equals spectator
+    prevent_spec: true
+
+    title: "&a❤ Ｒｅｓｐａｗｎ! ❤"
+    subtitle: "&f▶ &7Вы были возраждены&f!"
+
+    Delay:
+      title: "&6✛ Ｗaiting. . ."
+      subtitle: "&f▶ &7Вы будете возраждены через &c$delay&7 секунд!"
+      default: 5
+      permissions:
+        - cd.bypass 0
+        - cd.10 10
+        - cd.20 10
+        - cd.30 10
+        - cd.40 10
+        - cd.50 10
+        - cd.60 10
+        - cd.120 10
+
+# Разрешить при сообщениях spawn, spaw, spwn, spw и др. тепать игрока на спавн.
+chat: true
