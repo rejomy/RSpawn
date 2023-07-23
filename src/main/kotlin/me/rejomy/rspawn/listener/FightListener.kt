@@ -63,33 +63,23 @@ class FightListener : Listener {
         val dname: String = if (event.cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK) dpre else event.cause.name
 
 
+        val drops = player.inventory.contents.toMutableList()
+        drops.addAll(player.inventory.armorContents.toList())
+        drops.add(player.itemOnCursor)
+        drops.removeIf { it == null || it.type == Material.AIR }
+
         // call death event
         Bukkit.getPluginManager().callEvent(
             PlayerDeathEvent(
                 player,
-                player.inventory.contents.toList<ItemStack>(), player.expToLevel, "Player has been killed $dname"
+                drops, player.expToLevel, "Player has been killed $dname"
             )
         )
 
-        for (item in player.inventory.contents) {
-            if (item != null) {
-                player.inventory.remove(item)
-                loc.world.dropItemNaturally(loc, item)
-            }
-        }
+        drops.forEach { loc.world.dropItemNaturally(loc, it) }
 
-        if (player.itemOnCursor != null && player.itemOnCursor.type != Material.AIR) {
-            loc.world.dropItemNaturally(loc, player.itemOnCursor)
-            player.itemOnCursor = null
-        }
-
-        if (Bukkit.getVersion().contains("1.8")) {
-            for (item in player.inventory.armorContents)
-                if (item != null && item.type != null && item.type!! != Material.AIR)
-                    loc.world.dropItemNaturally(loc, item)
-        } else
-            player.inventory.itemInOffHand = null
-
+        player.inventory.clear()
+        player.itemOnCursor = null
         player.inventory.armorContents =
             arrayOf(
                 ItemStack(Material.AIR),
@@ -97,6 +87,9 @@ class FightListener : Listener {
                 ItemStack(Material.AIR),
                 ItemStack(Material.AIR)
             )
+        if (!Bukkit.getVersion().contains("1.8")) {
+            player.inventory.itemInOffHand = null
+        }
 
         //damage effect
         player.damage(0.0)
