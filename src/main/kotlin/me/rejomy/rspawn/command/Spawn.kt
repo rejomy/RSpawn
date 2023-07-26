@@ -40,7 +40,7 @@ class Spawn : CommandExecutor {
         } else {
 
             if(sender.hasPermission("rspawn.command")) {
-                sender.sendMessage("Error! Not perm!")
+                sender.sendMessage("Error! Not perm!!!")
                 return true
             }
 

@@ -170,7 +170,8 @@ class FightListener : Listener {
         // set statistic
         for (effect in player.activePotionEffects) player.removePotionEffect(effect.type)
         player.setStatistic(Statistic.DEATHS, player.getStatistic(Statistic.DEATHS) + 1)
-        if (damager[player.name] != null && Bukkit.getPlayer(damager[player.name]) != null) Bukkit.getPlayer(damager[player.name]!!)
+        if (damager[player.name] != null && Bukkit.getPlayer(damager[player.name]) != null)
+            Bukkit.getPlayer(damager[player.name]!!)
             .setStatistic(
                 Statistic.PLAYER_KILLS,
                 Bukkit.getPlayer(damager[player.name]!!).getStatistic(Statistic.PLAYER_KILLS) + 1
