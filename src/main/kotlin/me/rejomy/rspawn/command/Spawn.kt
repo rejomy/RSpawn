@@ -14,10 +14,10 @@ import java.io.File
 class Spawn : CommandExecutor {
 
     override fun onCommand(
-        sender: CommandSender?,
-        command: Command?,
-        label: String?,
-        args: Array<out String>?
+        sender: CommandSender,
+        command: Command,
+        label: String,
+        args: Array<out String>
     ): Boolean {
         if (args == null || args.isEmpty()) {
 
@@ -38,11 +38,17 @@ class Spawn : CommandExecutor {
             return true
 
         } else {
+
+            if(sender.hasPermission("rspawn.command")) {
+                sender.sendMessage("Error! Not perm!")
+                return true
+            }
+
             when (args[0]) {
                 "set" -> {
 
                     if(args.size != 2 || sender !is Player) {
-                        sender!!.sendMessage("Error! Illegal arguments or sender!")
+                        sender.sendMessage("Error! Illegal arguments or sender!")
                         return true
                     }
 
