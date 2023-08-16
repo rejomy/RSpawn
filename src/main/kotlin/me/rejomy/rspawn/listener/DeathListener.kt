@@ -15,13 +15,13 @@ class DeathListener : Listener {
         val player = event.entity.player
 
         val world = player.world.name
-        if(INSTANCE.disableWorlds.contains(world)) return
+        if (INSTANCE.disableWorlds.contains(world)) return
 
-        if(INSTANCE.config.getBoolean("Death.auto respawn")) {
+        if (INSTANCE.config.getBoolean("Death.auto respawn")) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(INSTANCE, {
                 player.spigot().respawn()
                 respawnPlayer(player)
-                                                                    }, 4)
+            }, 4)
         }
 
     }
@@ -29,12 +29,12 @@ class DeathListener : Listener {
     @EventHandler
     fun onRespawn(event: PlayerRespawnEvent) {
         val player = event.player
-
         val world = player.world.name
-        if(INSTANCE.disableWorlds.contains(world)) return
 
-        if(INSTANCE.config.getBoolean("Teleport.death")) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(INSTANCE, { player.teleport(INSTANCE.respawn)}, 4)
+        if (INSTANCE.disableWorlds.contains(world)) return
+
+        if (INSTANCE.config.getBoolean("Teleport.death")) {
+            respawnPlayer(player)
         }
     }
 

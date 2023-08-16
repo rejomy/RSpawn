@@ -17,24 +17,26 @@ fun respawnPlayer(player: Player) {
 
     var status = false
 
-    for(priority in INSTANCE.respawnPriority) {
-        when(priority) {
+    for (priority in INSTANCE.respawnPriority) {
+        when (priority) {
             "bed" ->
-                if(player.bedSpawnLocation != null) {
+                if (player.bedSpawnLocation != null) {
                     player.teleport(player.bedSpawnLocation)
                     status = true
                     break
                 }
+
             "spawn" ->
-                if(INSTANCE.respawn != null) {
+                if (INSTANCE.respawn != null) {
                     status = true
                     player.teleport(INSTANCE.respawn)
                     break
                 }
         }
-        if(!status) {
-            println("RSpawn -> Respawn priority incorrect!")
-        }
+    }
+
+    if (!status) {
+        println("RSpawn -> Respawn priority incorrect!")
     }
 
 }
