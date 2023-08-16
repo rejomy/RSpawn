@@ -1,6 +1,7 @@
 package me.rejomy.rspawn.listener
 
 import me.rejomy.rspawn.INSTANCE
+import me.rejomy.rspawn.util.respawnPlayer
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -17,7 +18,10 @@ class DeathListener : Listener {
         if(INSTANCE.disableWorlds.contains(world)) return
 
         if(INSTANCE.config.getBoolean("Death.auto respawn")) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(INSTANCE, { player.spigot().respawn(); player.teleport(INSTANCE.respawn)}, 4)
+            Bukkit.getScheduler().scheduleSyncDelayedTask(INSTANCE, {
+                player.spigot().respawn()
+                respawnPlayer(player)
+                                                                    }, 4)
         }
 
     }

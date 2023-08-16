@@ -18,3 +18,8 @@ commands:
       - спвн
       - савн
       - павн
+  kill:
+    aliases:
+      - killplayer
+      - playerkill
+    permission: rspawn.command.kill

@@ -1,6 +1,7 @@
 package me.rejomy.rspawn.command
 
 import me.rejomy.rspawn.INSTANCE
+import me.rejomy.rspawn.listener.cooldown
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.command.Command
@@ -19,9 +20,16 @@ class Spawn : CommandExecutor {
         label: String,
         args: Array<out String>
     ): Boolean {
-        if (args == null || args.isEmpty()) {
+        if (args.isEmpty()) {
 
             if(sender is Player) {
+
+                if(INSTANCE.config.getBoolean("Prevent death.Rebirth.block-commands")
+                    && cooldown.containsKey(sender.name)) {
+                    sender.sendMessage(INSTANCE.config.getString("Prevent death.Rebirth.block-commands-message")
+                        .replace("&", "§"))
+                    return false;
+                }
 
                 val player: Player = sender
 
@@ -31,16 +39,18 @@ class Spawn : CommandExecutor {
                 }
 
                 player.teleport(INSTANCE.spawn)
-                player.sendTitle(INSTANCE.config.getString("Teleport.title").replace("&", "§"), INSTANCE.config.getString("Teleport.subtitle").replace("&", "§"))
+
+                player.sendTitle(INSTANCE.config.getString("Teleport.title").replace("&", "§"),
+                    INSTANCE.config.getString("Teleport.subtitle").replace("&", "§"))
 
             } else
-                sender!!.sendMessage("Error! This command allowed for player!")
+                sender.sendMessage("Error! This command can`t executed from console.")
             return true
 
         } else {
 
-            if(sender.hasPermission("rspawn.command")) {
-                sender.sendMessage("Error! Not perm!!!")
+            if(!sender.hasPermission("rspawn.command")) {
+                sender.sendMessage("Error! Not perm!")
                 return true
             }
 
@@ -110,7 +120,10 @@ class Spawn : CommandExecutor {
 
                 }
 
-                "reload" -> INSTANCE.saveDefaultConfig()
+                "reload" -> {
+                    INSTANCE.reloadConfig()
+                    INSTANCE.respawnPriority = INSTANCE.config.getStringList("respawn priority") as ArrayList<String>
+                }
 
             }
         }

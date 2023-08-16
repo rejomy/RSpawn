@@ -1,6 +1,10 @@
 disable worlds:
   - none
 
+respawn priority:
+  - bed
+  - spawn
+
 Teleport:
   death: true
   join: true
@@ -26,6 +30,9 @@ Prevent death:
     post-gamemode: ADVENTURE
     # cancel player teleport if gamemode equals spectator
     prevent_spec: true
+
+    block-commands: true
+    block-commands-message: "&f▶ &7Вы не можете использовать команды во время возраждения&f!"
 
     title: "&a❤ Ｒｅｓｐａｗｎ! ❤"
     subtitle: "&f▶ &7Вы были возраждены&f!"
