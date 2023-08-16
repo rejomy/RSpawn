@@ -57,7 +57,7 @@ class Main : JavaPlugin() {
 
         respawnPriority = config.getStringList("respawn priority") as ArrayList<String>
 
-        for(world in INSTANCE.config.getStringList("disable worlds")) {
+        for(world in config.getStringList("disable worlds")) {
             disableWorlds.add(world)
         }
 
@@ -65,7 +65,7 @@ class Main : JavaPlugin() {
         Bukkit.getPluginManager().registerEvents(DeathListener(), this)
         Bukkit.getPluginManager().registerEvents(FightListener(), this)
 
-        if(INSTANCE.config.getBoolean("Prevent death.Rebirth.block-commands")) {
+        if(config.getBoolean("Prevent death.Rebirth.block-commands")) {
             Bukkit.getPluginManager().registerEvents(CommandListener(), this)
         }
 
@@ -75,7 +75,9 @@ class Main : JavaPlugin() {
             Bukkit.getPluginManager().registerEvents(Teleport(), this)
 
         getCommand("spawn").executor = Spawn()
-        getCommand("kill").executor = KillPlayer()
+
+        if(config.getBoolean("Prevent death.enable"))
+            getCommand("kill").executor = KillPlayer()
 
     }
 
