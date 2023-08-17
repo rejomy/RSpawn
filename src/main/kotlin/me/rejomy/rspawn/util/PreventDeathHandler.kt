@@ -159,7 +159,7 @@ class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCau
                             Bukkit.getPlayer(damager[player.name]!!).getStatistic(Statistic.PLAYER_KILLS) + 1
                         )
                 player.foodLevel = 20
-                player.health = player.healthScale
+                player.health = player.maxHealth
                 player.exp = 0F
             }
         }
