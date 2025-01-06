@@ -9,8 +9,11 @@ class Teleport: Listener {
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     fun onTeleport(event: PlayerTeleportEvent) {
-        if(event.cause == PlayerTeleportEvent.TeleportCause.SPECTATE && cooldown.containsKey(event.player.name))
+
+        if(event.cause == PlayerTeleportEvent.TeleportCause.SPECTATE && cooldown.containsKey(event.player.name)) {
             event.isCancelled = true
+        }
+
     }
 
 }

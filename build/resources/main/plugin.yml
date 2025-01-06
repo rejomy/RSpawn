@@ -1,6 +1,11 @@
 name: RSpawn
 version: 1
 main: me.rejomy.rspawn.Main
+api-version: 1.13
+softdepend:
+  - Multiverse-Core
+  - MultiWorld
+  - AntiRelog
 commands:
   spawn:
     aliases:
@@ -18,3 +23,8 @@ commands:
       - спвн
       - савн
       - павн
+  kill:
+    aliases:
+      - killplayer
+      - playerkill
+    permission: rspawn.command.kill

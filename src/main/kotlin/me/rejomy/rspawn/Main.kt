@@ -19,45 +19,38 @@ var duel: Duels? = null
 class Main : JavaPlugin() {
 
     val disableWorlds = ArrayList<String>()
-
     var delay = config.getStringList("Prevent death.Rebirth.Delay.permissions")
     var defaultDelay = config.getInt("Prevent death.Rebirth.Delay.default")
     var spawn: Location? = null
     var respawn: Location? = null
     var respawnPriority = ArrayList<String>()
 
-    override fun onEnable() {
-        INSTANCE = this
-        saveDefaultConfig()
+    override fun onLoad() {
+        INSTANCE = this;
 
+        // Save default config for create config file and folder if it does not exists.
+        saveDefaultConfig()
+    }
+
+    override fun onEnable() {
         duel = Bukkit.getServer().pluginManager.getPlugin("Duels") as Duels?
         ar = Bukkit.getServer().pluginManager.getPlugin("AntiRelog") as Antirelog?
 
         val file = File(dataFolder, "location.yml")
+
         if (file.exists()) {
             val config: FileConfiguration = YamlConfiguration.loadConfiguration(file)
-            spawn = Location(
-                Bukkit.getWorld(config.getString("Spawn.world")),
-                config.getDouble("Spawn.x"),
-                config.getDouble("Spawn.y"),
-                config.getDouble("Spawn.z"),
-                config.getDouble("Spawn.yaw").toFloat(),
-                config.getDouble("Spawn.pitch").toFloat()
-            )
-
-            respawn = Location(
-                Bukkit.getWorld(config.getString("Respawn.world")),
-                config.getDouble("Respawn.x"),
-                config.getDouble("Respawn.y"),
-                config.getDouble("Respawn.z"),
-                config.getDouble("Respawn.yaw").toFloat(),
-                config.getDouble("Respawn.pitch").toFloat()
-            )
+            fillSpawnPositionsFromFile(config)
+        } else {
+            for (world in Bukkit.getWorlds()) {
+                spawn = world.spawnLocation
+                break
+            }
         }
 
         respawnPriority = config.getStringList("respawn priority") as ArrayList<String>
 
-        for(world in config.getStringList("disable worlds")) {
+        for (world in config.getStringList("disable worlds")) {
             disableWorlds.add(world)
         }
 
@@ -65,7 +58,7 @@ class Main : JavaPlugin() {
         Bukkit.getPluginManager().registerEvents(DeathListener(), this)
         Bukkit.getPluginManager().registerEvents(FightListener(), this)
 
-        if(config.getBoolean("Prevent death.Rebirth.block-commands")) {
+        if (config.getBoolean("Prevent death.Rebirth.block-commands")) {
             Bukkit.getPluginManager().registerEvents(CommandListener(), this)
         }
 
@@ -76,9 +69,28 @@ class Main : JavaPlugin() {
 
         getCommand("spawn").executor = Spawn()
 
-        if(config.getBoolean("Prevent death.enable"))
+        if (config.getBoolean("Prevent death.enable"))
             getCommand("kill").executor = KillPlayer()
 
     }
 
+    fun fillSpawnPositionsFromFile(config: FileConfiguration) {
+        spawn = Location(
+            Bukkit.getWorld(config.getString("Spawn.world")),
+            config.getDouble("Spawn.x"),
+            config.getDouble("Spawn.y"),
+            config.getDouble("Spawn.z"),
+            config.getDouble("Spawn.yaw").toFloat(),
+            config.getDouble("Spawn.pitch").toFloat()
+        )
+
+        respawn = Location(
+            Bukkit.getWorld(config.getString("Respawn.world")),
+            config.getDouble("Respawn.x"),
+            config.getDouble("Respawn.y"),
+            config.getDouble("Respawn.z"),
+            config.getDouble("Respawn.yaw").toFloat(),
+            config.getDouble("Respawn.pitch").toFloat()
+        )
+    }
 }

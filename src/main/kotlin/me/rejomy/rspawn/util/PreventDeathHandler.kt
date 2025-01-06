@@ -1,25 +1,24 @@
 package me.rejomy.rspawn.util
 
 import me.rejomy.rspawn.INSTANCE
-import me.rejomy.rspawn.ar
 import me.rejomy.rspawn.listener.cooldown
 import me.rejomy.rspawn.listener.damager
+import me.rejomy.rspawn.task.RespawnTask
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.Statistic
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.PlayerDeathEvent
-import org.bukkit.event.player.PlayerRespawnEvent
 import org.bukkit.inventory.ItemStack
 
 class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCause?) {
 
-    val loc = player.location
-    val name = player.name
+    private val loc: Location = player.location
+    private val name: String = player.name
 
     init {
-
         var next = false
         var dname = ""
 
@@ -72,7 +71,7 @@ class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCau
 
             if (INSTANCE.config.getBoolean("Prevent death.Rebirth.enable")) {
 
-                var delay: Int
+                val delay: Int
 
                 if (cause != null) {
                     delay = getDelay(player)
@@ -90,78 +89,30 @@ class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCau
                     delay = cooldown[name]!!
                 }
 
-                var stop = false;
+                val task = RespawnTask(delay, player);
 
-                val taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(INSTANCE, {
-                    if (player.isOnline) {
-                        if (stop) return@scheduleSyncRepeatingTask
+                val taskRun = Bukkit.getScheduler().runTaskTimer(INSTANCE, { task.run() }, 20L, 20L)
 
-                        delay -= 1
-
-                        cooldown[player.name] = delay
-
-                        if (delay < 0) Bukkit.dispatchCommand(
-                            Bukkit.getConsoleSender(),
-                            "ban Regomy Опять фигню сделал! Delay $delay & Map ${cooldown[player.name]}"
-                        )
-
-                        player.sendTitle(
-                            INSTANCE.config.getString("Prevent death.Rebirth.Delay.title").replace("&", "§"),
-                            INSTANCE.config.getString("Prevent death.Rebirth.Delay.subtitle")
-                                .replace("\$delay", "$delay")
-                                .replace("&", "§")
-                        )
-                    } else
-                        stop = true
-                }, 20, 20)
-
-                Bukkit.getScheduler().scheduleSyncDelayedTask(INSTANCE, {
-
-                    Bukkit.getScheduler().cancelTask(taskID)
-
-                    if (!stop) {
-                        player.sendTitle(
-                            INSTANCE.config.getString("Prevent death.Rebirth.title").replace("&", "§"),
-                            INSTANCE.config.getString("Prevent death.Rebirth.subtitle").replace("&", "§")
-                        )
-                        if (ar != null && ar!!.pvpManager.isInPvP(player))
-                            ar!!.pvpManager.stopPvP(player)
-
-                        Bukkit.getPluginManager().callEvent(
-                            PlayerRespawnEvent(
-                                player, INSTANCE.respawn, false
-                            )
-                        )
-                        player.exp = 0F
-
-                        respawnPlayer(player)
-
-                        Bukkit.dispatchCommand(
-                            Bukkit.getConsoleSender(),
-                            "gamemode " + INSTANCE.config.getString("Prevent death.Rebirth.post-gamemode") + " " + player.name
-                        )
-
-                        cooldown.remove(player.name)
-                    }
-
-                }, (delay * 20).toLong())
-            } else
+                task.task = taskRun
+            } else {
                 player.teleport(INSTANCE.respawn)
+            }
 
             if (cause != null) {
+                PlayerUtil.clearEffects(player);
+
                 // set statistic
-                for (effect in player.activePotionEffects) player.removePotionEffect(effect.type)
                 player.setStatistic(Statistic.DEATHS, player.getStatistic(Statistic.DEATHS) + 1)
+
                 if (damager[player.name] != null && Bukkit.getPlayer(damager[player.name]) != null)
                     Bukkit.getPlayer(damager[player.name]!!)
                         .setStatistic(
                             Statistic.PLAYER_KILLS,
                             Bukkit.getPlayer(damager[player.name]!!).getStatistic(Statistic.PLAYER_KILLS) + 1
                         )
-                player.foodLevel = 20
-                player.health = player.maxHealth
-                player.exp = 0F
             }
+
+            PlayerUtil.resetVariables(player);
         }
     }
 

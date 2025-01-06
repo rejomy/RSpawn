@@ -7,7 +7,9 @@ respawn priority:
 
 Teleport:
   death: true
-  join: true
+  join:
+    first: false
+    after first: true
   fall: true
   title: ""
   subtitle: ""

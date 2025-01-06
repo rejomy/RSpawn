@@ -55,7 +55,7 @@ compileTestKotlin {
 
 task deploy(type: Copy) {
     from jar
-    into file('C:\\Users\\Admin\\Desktop\\Майнкрафт\\Server\\Локальные хосты\\testserver\\plugins')
+    into file('C:\\Users\\Arobi\\Desktop')
 }
 
 application {

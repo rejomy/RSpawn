@@ -27,6 +27,7 @@ class FightListener : Listener {
         // Links
         val player: Player = event.entity as Player
         val world = player.world.name
+
         if(duel != null && duel!!.arenaManager.isInMatch(player)) return
 
         INSTANCE.disableWorlds.forEach {
@@ -36,7 +37,7 @@ class FightListener : Listener {
         val loc = player.location
 
         if (loc.y < 0 && INSTANCE.config.getBoolean("Teleport.fall")
-            && (ar != null && !ar!!.pvpManager.isInPvP(player)) || ar == null) {
+            && !(ar != null && ar!!.pvpManager.isInPvP(player))) {
             event.isCancelled = true
             player.teleport(INSTANCE.spawn)
             return
@@ -58,12 +59,16 @@ class FightListener : Listener {
     @EventHandler
     fun onEntityDamage(event: EntityDamageByEntityEvent) {
         if (event.entity !is Player) return
+
         var killer = event.damager
         val world = killer.world.name
-        if(INSTANCE.disableWorlds.contains(world)) return
+
+        if (INSTANCE.disableWorlds.contains(world))
+            return
 
         if (killer is Projectile && (killer.shooter is Monster || killer.shooter is Player))
             killer = killer.shooter as Entity
+
         damager[event.entity.name] = killer.name
     }
 
