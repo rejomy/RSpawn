@@ -16,7 +16,6 @@ class ConnectionListener : Listener {
 
         if (player.hasPlayedBefore()) {
             if (INSTANCE.config.getBoolean("Teleport.join.after first")) {
-                println("teleport")
                 player.teleport(INSTANCE.spawn)
             }
         } else if (INSTANCE.config.getBoolean("Teleport.join.first")) {
