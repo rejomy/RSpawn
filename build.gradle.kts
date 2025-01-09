@@ -41,8 +41,3 @@ tasks.compileKotlin {
     kotlinOptions.jvmTarget = "17"
 }
 
-tasks.register<Copy>("deploy") {
-    from(tasks.jar)
-    into(file("C:\\Users\\Arobi\\Desktop"))
-}
-
