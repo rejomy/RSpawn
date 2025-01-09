@@ -2,7 +2,8 @@ package me.rejomy.rspawn.command
 
 import me.rejomy.rspawn.INSTANCE
 import me.rejomy.rspawn.listener.cooldown
-import org.bukkit.Bukkit
+import me.rejomy.rspawn.util.TeleportUtil
+import me.rejomy.rspawn.util.TitleUtil
 import org.bukkit.Location
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -20,113 +21,118 @@ class Spawn : CommandExecutor {
         label: String,
         args: Array<out String>
     ): Boolean {
+
         if (args.isEmpty()) {
 
-            if(sender is Player) {
+            if (sender is Player) {
 
-                if(INSTANCE.config.getBoolean("Prevent death.Rebirth.block-commands")
-                    && cooldown.containsKey(sender.name)) {
-                    sender.sendMessage(INSTANCE.config.getString("Prevent death.Rebirth.block-commands-message")
-                        .replace("&", "§"))
+                if (INSTANCE.config.getBoolean("rebirth.block-commands")
+                    && cooldown.containsKey(sender.name)
+                ) {
+                    sender.sendMessage(
+                        INSTANCE.config.getString("rebirth.block-commands-message")
+                            .replace("&", "§")
+                    )
                     return false;
                 }
 
-                val player: Player = sender
-
-                if( INSTANCE.spawn == null ) {
-                    sender.sendMessage("Spawn not found!")
+                if (INSTANCE.spawn == null) {
+                    sender.sendMessage("Spawn does not set in the config!")
+                    sender.sendMessage("Please use /spawn set spawn")
                     return true
                 }
 
-                player.teleport(INSTANCE.spawn)
+                val player: Player = sender
+                TeleportUtil.teleportToSpawn(player)
+                TitleUtil.displayTitle(player,
+                    INSTANCE.config.getString("teleport.title").replace("&", "§"),
+                    INSTANCE.config.getString("teleport.subtitle").replace("&", "§"),
+                    5, 40, 5
+                )
 
-                player.sendTitle(INSTANCE.config.getString("Teleport.title").replace("&", "§"),
-                    INSTANCE.config.getString("Teleport.subtitle").replace("&", "§"))
-
-            } else
+            } else {
                 sender.sendMessage("Error! This command can`t executed from console.")
-            return true
-
-        } else {
-
-            if(!sender.hasPermission("rspawn.command")) {
-                sender.sendMessage("Error! Not perm!")
-                return true
             }
-
+        } else {
             when (args[0]) {
                 "set" -> {
+                    if (dontHasPermission(sender, "rspawn.command.set",
+                            "You dont have permission rspawn.command.set for execute this command.")) {
+                        return true
+                    }
 
-                    if(args.size != 2 || sender !is Player) {
-                        sender.sendMessage("Error! Illegal arguments or sender!")
+                    if (args.size != 2) {
+                        sender.sendMessage("Illegal arguments, please use /spawn set spawn or /spawn set respawn")
+                        return true
+                    }
+
+                    if (sender !is Player) {
+                        sender.sendMessage("Error! This command can`t executed from console.")
                         return true
                     }
 
                     val player: Player = sender
+                    val location: Location = player.location
 
-                    val file = File(INSTANCE.dataFolder, File.separator + "location.yml")
-                    val config: FileConfiguration = YamlConfiguration.loadConfiguration(file)
+                    when (args[1]) {
+                        "spawn" -> {
+                            savePositionToConfig("spawn", location)
+                            INSTANCE.spawn = location
 
-                    if(file.exists())
-                        file.createNewFile()
-
-
-                        when (args[1]) {
-
-                            "spawn" -> {
-                                config.set("Spawn.world", player.world.name)
-                                config.set("Spawn.x", player.location.x)
-                                config.set("Spawn.y", player.location.y)
-                                config.set("Spawn.z", player.location.z)
-                                config.set("Spawn.yaw", player.location.yaw)
-                                config.set("Spawn.pitch", player.location.pitch)
-
-                                config.save(file)
-
-                                INSTANCE.spawn = Location(Bukkit.getWorld(config.getString("Spawn.world")),
-                                    config.getDouble("Spawn.x"),
-                                    config.getDouble("Spawn.y"),
-                                    config.getDouble("Spawn.z"),
-                                    config.getDouble("Spawn.yaw").toFloat(),
-                                    config.getDouble("Spawn.pitch").toFloat())
-                                sender.sendMessage("Spawn successful set from location x: " + player.location.x + " y: " + player.location.y +
-                                " z: " + player.location.z)
-                            }
-
-                            "respawn" -> {
-
-                                config.set("Respawn.world", player.world.name)
-                                config.set("Respawn.x", player.location.x)
-                                config.set("Respawn.y", player.location.y)
-                                config.set("Respawn.z", player.location.z)
-                                config.set("Respawn.yaw", player.location.yaw)
-                                config.set("Respawn.pitch", player.location.pitch)
-
-                                config.save(file)
-
-                                INSTANCE.respawn = Location(
-                                    Bukkit.getWorld(config.getString("Respawn.world")),
-                                    config.getDouble("Respawn.x"),
-                                    config.getDouble("Respawn.y"),
-                                    config.getDouble("Respawn.z"),
-                                    config.getDouble("Respawn.yaw").toFloat(),
-                                    config.getDouble("Respawn.pitch").toFloat())
-
-                                sender.sendMessage("Respawn successful set from location x: " + player.location.x + " y: " + player.location.y +
-                                        " z: " + player.location.z)
-                            }
-
+                            sender.sendMessage(
+                                "Spawn successful set from location x: " + player.location.x + " y: " + player.location.y +
+                                        " z: " + player.location.z
+                            )
                         }
 
+                        "respawn" -> {
+                            savePositionToConfig("respawn", location)
+                            INSTANCE.respawn = location
+
+                            sender.sendMessage(
+                                "Respawn successful set from location x: " + player.location.x + " y: " + player.location.y +
+                                        " z: " + player.location.z
+                            )
+                        }
+
+                    }
                 }
 
                 "reload" -> {
+                    if (dontHasPermission(sender, "rspawn.command.reload",
+                            "You dont have permission rspawn.command.reload for execute this command.")) {
+                        return true
+                    }
+
                     INSTANCE.reloadConfig()
-                    INSTANCE.respawnPriority = INSTANCE.config.getStringList("respawn priority") as ArrayList<String>
+                    INSTANCE.respawnPriority = INSTANCE.config.getStringList("respawn-priority") as ArrayList<String>
                 }
 
             }
         }
+
         return true
+    }
+
+    fun dontHasPermission(sender: CommandSender, permission: String, message: String): Boolean {
+        val dontHasPermission = !sender.hasPermission(permission);
+
+        if (dontHasPermission)
+            sender.sendMessage(message)
+
+        return dontHasPermission;
+    }
+    
+    fun savePositionToConfig(path: String, location: Location) {
+        val file = File(INSTANCE.dataFolder, File.separator + "location.yml")
+        val config: FileConfiguration = YamlConfiguration.loadConfiguration(file)
+
+        config.set("$path.world", location.world.name)
+        config.set("$path.x", location.x)
+        config.set("$path.y", location.y)
+        config.set("$path.z", location.z)
+        config.set("$path.yaw", location.yaw)
+        config.set("$path.pitch", location.pitch)
+        config.save(file)
     }
 }

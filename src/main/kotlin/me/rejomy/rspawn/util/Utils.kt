@@ -1,42 +1,47 @@
 package me.rejomy.rspawn.util
 
 import me.rejomy.rspawn.INSTANCE
-import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.entity.Player
 
-fun getDelay(player: Player): Int {
-    for (amount in INSTANCE.delay) {
-        val line = amount.split(" ")
-        if (player.hasPermission(line[0]))
-            return line[1].toInt()
+object Utils {
+
+    fun getRespawnDelay(player: Player): Int {
+        for (string in INSTANCE.delay) {
+            val parts = string.split("\\s+".toRegex())
+
+            if (player.hasPermission(parts[0])) {
+                return parts[1].toInt()
+            }
+        }
+
+        return INSTANCE.defaultDelay
     }
-    return INSTANCE.defaultDelay
-}
 
-fun respawnPlayer(player: Player) {
+    fun getRespawnLocation(player: Player): Location? {
+        for (priority in INSTANCE.respawnPriority) {
+            when (priority) {
+                "bed" ->
+                    if (player.bedSpawnLocation != null) {
+                        return player.bedSpawnLocation
+                    }
 
-    var status = false
+                "spawn" ->
+                    if (INSTANCE.respawn != null) {
+                        return INSTANCE.respawn
+                    }
+            }
+        }
 
-    for (priority in INSTANCE.respawnPriority) {
-        when (priority) {
-            "bed" ->
-                if (player.bedSpawnLocation != null) {
-                    player.teleport(player.bedSpawnLocation)
-                    status = true
-                    break
-                }
+        println("RSpawn -> Respawn priority incorrect!")
+        return null
+    }
 
-            "spawn" ->
-                if (INSTANCE.respawn != null) {
-                    status = true
-                    player.teleport(INSTANCE.respawn)
-                    break
-                }
+    fun teleportToRespawn(player: Player) {
+        val location = getRespawnLocation(player)
+
+        if (location != null) {
+            TeleportUtil.teleport(player, location)
         }
     }
-
-    if (!status) {
-        println("RSpawn -> Respawn priority incorrect!")
-    }
-
 }

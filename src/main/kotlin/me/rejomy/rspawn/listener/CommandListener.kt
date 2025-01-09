@@ -7,16 +7,17 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent
 
 class CommandListener : Listener {
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     fun onCommand(event: PlayerCommandPreprocessEvent) {
         val player = event.player
+        val blockCommands = INSTANCE.config.getBoolean("rebirth.block-commands");
+        val respawning = cooldown.containsKey(player.name);
 
-        if(cooldown.containsKey(player.name)) {
-            player.sendMessage(INSTANCE.config.getString("Prevent death.Rebirth.block-commands-message")
-                .replace("&", "§"))
+        if (blockCommands && respawning) {
+            player.sendMessage(
+                INSTANCE.config.getString("rebirth.block-commands-message").replace("&", "§")
+            )
             event.isCancelled = true
         }
-
     }
-
 }

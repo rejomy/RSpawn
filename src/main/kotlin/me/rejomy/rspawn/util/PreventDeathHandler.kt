@@ -4,14 +4,12 @@ import me.rejomy.rspawn.INSTANCE
 import me.rejomy.rspawn.listener.cooldown
 import me.rejomy.rspawn.listener.damager
 import me.rejomy.rspawn.task.RespawnTask
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.Statistic
+import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.util.Vector
 
 class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCause?) {
 
@@ -41,7 +39,9 @@ class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCau
                 )
             )
 
-            drops.forEach { loc.world.dropItemNaturally(loc, it) }
+            drops.forEach {
+                loc.world.dropItemNaturally(loc, it)
+            }
 
             player.inventory.clear()
             player.itemOnCursor = null
@@ -52,7 +52,7 @@ class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCau
                     ItemStack(Material.AIR),
                     ItemStack(Material.AIR)
                 )
-            if (!Bukkit.getVersion().contains("1.8")) {
+            if (ServerVersionUtil.newerThan18()) {
                 player.inventory.itemInOffHand = null
             }
 
@@ -63,38 +63,39 @@ class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCau
         }
 
         if (next) {
+            val respawnDelay = cooldown.getOrElse(player.name) { Utils.getRespawnDelay(player) }
+            // If player respawn delay is zero or negative, we should respawn him immediately.
+            val respawnDelayIsPositive = respawnDelay > 0
 
-            Bukkit.dispatchCommand(
-                Bukkit.getConsoleSender(),
-                "gamemode " + INSTANCE.config.getString("Prevent death.Rebirth.pre-gamemode") + " " + player.name
-            )
-
-            if (INSTANCE.config.getBoolean("Prevent death.Rebirth.enable")) {
-
-                val delay: Int
+            if (INSTANCE.config.getBoolean("rebirth.enable") && respawnDelayIsPositive) {
+                Bukkit.dispatchCommand(
+                    Bukkit.getConsoleSender(),
+                    "gamemode " + INSTANCE.config.getString("rebirth.pre-gamemode") + " " + player.name
+                )
 
                 if (cause != null) {
-                    delay = getDelay(player)
+                    if (cause == EntityDamageEvent.DamageCause.VOID) {
+                        player.teleport(INSTANCE.respawn!!.clone().add(0.0, 0.0, 0.0))
+                        // Reset velocity cuz in fight pl it set y motion and player fall under ground.
+                        player.velocity = Vector(0, 0, 0)
+                    }
 
-                    if (cause == EntityDamageEvent.DamageCause.VOID)
-                        player.teleport(INSTANCE.respawn!!.clone().add(0.0, 3.0, 0.0))
+                    cooldown[player.name] = respawnDelay
 
-                    cooldown[player.name] = delay
-
-                    player.sendTitle(
-                        INSTANCE.config.getString("Death.title").replace("&", "§"),
-                        INSTANCE.config.getString("Death.subtitle").replace("\$killer", dname).replace("&", "§")
+                    TitleUtil.displayTitle(
+                        player,
+                        INSTANCE.config.getString("death.title").replace("&", "§"),
+                        INSTANCE.config.getString("death.subtitle").replace("\$killer", dname).replace("&", "§"),
+                        3, 20, 3
                     )
-                } else {
-                    delay = cooldown[name]!!
                 }
 
-                val task = RespawnTask(delay, player);
-
+                val task = RespawnTask(respawnDelay, player);
                 val taskRun = Bukkit.getScheduler().runTaskTimer(INSTANCE, { task.run() }, 20L, 20L)
-
                 task.task = taskRun
             } else {
+                // If cooldown contains player name (rebirth enable, but player respawn delay is zero)
+                cooldown.remove(player.name)
                 player.teleport(INSTANCE.respawn)
             }
 

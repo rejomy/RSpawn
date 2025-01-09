@@ -1,57 +1,79 @@
-disable worlds:
+# Worlds where plugin will not working.
+disable-worlds:
   - none
 
-respawn priority:
+# Respawn priority is in decrease order.
+# Explanation: At first we check if player has bed, if it is true, we will respawn him in the bed.
+#     If he does not has a bed, we will teleport him to the spawn.
+respawn-priority:
   - bed
   - spawn
 
-Teleport:
-  death: true
+# After which situations we should teleport player to the spawn.
+teleport:
+  # Teleport player after respawn event to respawn position.
+  respawn: true
+  # Teleport player after join and first join to the spawn.
   join:
     first: false
-    after first: true
+    after-first: true
+  # Teleport player to the spawn when is falling.
   fall: true
-  title: ""
-  subtitle: ""
 
-Death:
-  auto respawn: false
+  title: "Boom!"
+  subtitle: "You were teleported to the spawn"
+
+death:
+  auto-respawn: false
   title: "&4✘ Ｄｅａｔｈ! ✘"
   subtitle: "&f▶ &7Вы были убиты &c$killer&7!"
 
-Prevent death:
-
+prevent-death:
   enable: true
 
-  Rebirth:
-    # Enable the option for disable respawn wait time.
-    enable: true
-    # Rebirth gamemode
-    pre-gamemode: SPECTATOR
-    # Respawn gamemode
-    post-gamemode: ADVENTURE
-    # cancel player teleport if gamemode equals spectator
-    prevent_spec: true
+rebirth:
+  # Enable the option for disable respawn wait time.
+  enable: true
+  # Rebirth gamemode
+  pre-gamemode: SPECTATOR
+  # Respawn gamemode
+  post-gamemode: ADVENTURE
+  # Prevent click in the hot-bar to player head for teleport to the player while respawning.
+  prevent-spec: true
+  # Prevent player posses to the player while he is respawning
+  prevent-posses-players-in-spectator: true
+  # Prevent interact with any items and entities while player is respawning.
+  prevent-interact: true
 
-    block-commands: true
-    block-commands-message: "&f▶ &7Вы не можете использовать команды во время возраждения&f!"
+  block-commands: true
+  block-commands-message: "&f▶ &7Вы не можете использовать команды во время возраждения&f!"
 
-    title: "&a❤ Ｒｅｓｐａｗｎ! ❤"
-    subtitle: "&f▶ &7Вы были возраждены&f!"
+  title: "&a❤ Ｒｅｓｐａｗｎ! ❤"
+  subtitle: "&f▶ &7Вы были возраждены&f!"
 
-    Delay:
-      title: "&6✛ Ｗaiting. . ."
-      subtitle: "&f▶ &7Вы будете возраждены через &c$delay&7 секунд!"
-      default: 5
-      permissions:
-        - cd.bypass 0
-        - cd.10 10
-        - cd.20 10
-        - cd.30 10
-        - cd.40 10
-        - cd.50 10
-        - cd.60 10
-        - cd.120 10
+  delay:
+    title: "&6✛ Ｗaiting. . ."
+    subtitle: "&f▶ &7Вы будете возраждены через &c$delay&7 секунд!"
+    # How much seconds player will respawning
+    default: 5
+    # Here you can set custom respawn time in seconds dependency by permission.
+    # format: permission seconds
+    # Set permission in not decreasing order, we will check it from cd.bypass and move down.
+    # if player will has two permission, we choose permission that on top.
+    permissions:
+      - cd.bypass 0
+      - cd.10 10
+      - cd.20 10
+      - cd.30 10
+      - cd.40 10
+      - cd.50 10
+      - cd.60 10
+      - cd.120 10
+
+# Should we register our own kill command?
+# rspawn.command.kill - permission that allows player to kill yourself.
+# rspawn.command.kill.others - permission that allows player to kill another guys.
+register-kill-command: false
 
 # Разрешить при сообщениях spawn, spaw, spwn, spw и др. тепать игрока на спавн.
 chat: true

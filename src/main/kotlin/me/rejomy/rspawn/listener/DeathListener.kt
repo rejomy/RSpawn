@@ -1,41 +1,30 @@
 package me.rejomy.rspawn.listener
 
 import me.rejomy.rspawn.INSTANCE
-import me.rejomy.rspawn.util.respawnPlayer
+import me.rejomy.rspawn.duel
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
-import org.bukkit.event.player.PlayerRespawnEvent
 
 class DeathListener : Listener {
 
     @EventHandler
     fun onDeath(event: PlayerDeathEvent) {
         val player = event.entity.player
-
         val world = player.world.name
-        if (INSTANCE.disableWorlds.contains(world)) return
+        val isInDuel = duel != null && duel!!.arenaManager.isInMatch(player)
+        val isInDisabledWorld = INSTANCE.disableWorlds.any { it == world }
+        val playerIsNotDied = player.isDead // Be sure cuz our plugin send player death event too, but player alive.
 
-        if (INSTANCE.config.getBoolean("Death.auto respawn")) {
+        if (isInDisabledWorld || isInDuel || playerIsNotDied) {
+            return
+        }
+
+        if (INSTANCE.config.getBoolean("death.auto-respawn")) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(INSTANCE, {
                 player.spigot().respawn()
-                respawnPlayer(player)
-            }, 4)
-        }
-
-    }
-
-    @EventHandler
-    fun onRespawn(event: PlayerRespawnEvent) {
-        val player = event.player
-        val world = player.world.name
-
-        if (INSTANCE.disableWorlds.contains(world)) return
-
-        if (INSTANCE.config.getBoolean("Teleport.death")) {
-            respawnPlayer(player)
+            }, 1)
         }
     }
-
 }

@@ -6,6 +6,7 @@ softdepend:
   - Multiverse-Core
   - MultiWorld
   - AntiRelog
+  - PacketEvents
 commands:
   spawn:
     aliases:
@@ -23,6 +24,8 @@ commands:
       - спвн
       - савн
       - павн
+    permission: rspawn.command.spawn
+    permission-message: You dont have permission rspawn.command.spawn for execute this command.
   kill:
     aliases:
       - killplayer

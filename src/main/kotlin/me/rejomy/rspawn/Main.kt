@@ -13,14 +13,14 @@ import ru.leymooo.antirelog.Antirelog
 import java.io.File
 
 lateinit var INSTANCE: Main
-var ar: Antirelog? = null
+var antirelog: Antirelog? = null
 var duel: Duels? = null
 
 class Main : JavaPlugin() {
 
     val disableWorlds = ArrayList<String>()
-    var delay = config.getStringList("Prevent death.Rebirth.Delay.permissions")
-    var defaultDelay = config.getInt("Prevent death.Rebirth.Delay.default")
+    var delay = config.getStringList("rebirth.delay.permissions")
+    var defaultDelay = config.getInt("rebirth.delay.default")
     var spawn: Location? = null
     var respawn: Location? = null
     var respawnPriority = ArrayList<String>()
@@ -34,13 +34,14 @@ class Main : JavaPlugin() {
 
     override fun onEnable() {
         duel = Bukkit.getServer().pluginManager.getPlugin("Duels") as Duels?
-        ar = Bukkit.getServer().pluginManager.getPlugin("AntiRelog") as Antirelog?
+        antirelog = Bukkit.getServer().pluginManager.getPlugin("AntiRelog") as Antirelog?
 
         val file = File(dataFolder, "location.yml")
 
         if (file.exists()) {
             val config: FileConfiguration = YamlConfiguration.loadConfiguration(file)
-            fillSpawnPositionsFromFile(config)
+            respawn = getLocationFromFile("respawn", config)
+            spawn = getLocationFromFile("spawn", config)
         } else {
             for (world in Bukkit.getWorlds()) {
                 spawn = world.spawnLocation
@@ -48,49 +49,39 @@ class Main : JavaPlugin() {
             }
         }
 
-        respawnPriority = config.getStringList("respawn priority") as ArrayList<String>
+        respawnPriority = config.getStringList("respawn-priority") as ArrayList<String>
 
-        for (world in config.getStringList("disable worlds")) {
+        for (world in config.getStringList("disable-worlds")) {
             disableWorlds.add(world)
         }
 
-        Bukkit.getPluginManager().registerEvents(ConnectionListener(), this)
-        Bukkit.getPluginManager().registerEvents(DeathListener(), this)
-        Bukkit.getPluginManager().registerEvents(FightListener(), this)
-
-        if (config.getBoolean("Prevent death.Rebirth.block-commands")) {
-            Bukkit.getPluginManager().registerEvents(CommandListener(), this)
+        // Register listeners
+        arrayOf(
+            ConnectionListener(),
+            DeathListener(),
+            RespawnListener(),
+            FightListener(),
+            CommandListener(),
+            ChatListener(),
+            InteractListener(),
+            TeleportListener(),
+        ).forEach {
+            Bukkit.getPluginManager().registerEvents(it, this)
         }
 
-        if (config.getBoolean("chat"))
-            Bukkit.getPluginManager().registerEvents(Chat(), this)
-        if (config.getBoolean("Prevent death.Rebirth.prevent_spec"))
-            Bukkit.getPluginManager().registerEvents(Teleport(), this)
-
         getCommand("spawn").executor = Spawn()
-
-        if (config.getBoolean("Prevent death.enable"))
+        if (config.getBoolean("register-kill-command"))
             getCommand("kill").executor = KillPlayer()
-
     }
 
-    fun fillSpawnPositionsFromFile(config: FileConfiguration) {
-        spawn = Location(
-            Bukkit.getWorld(config.getString("Spawn.world")),
-            config.getDouble("Spawn.x"),
-            config.getDouble("Spawn.y"),
-            config.getDouble("Spawn.z"),
-            config.getDouble("Spawn.yaw").toFloat(),
-            config.getDouble("Spawn.pitch").toFloat()
-        )
-
-        respawn = Location(
-            Bukkit.getWorld(config.getString("Respawn.world")),
-            config.getDouble("Respawn.x"),
-            config.getDouble("Respawn.y"),
-            config.getDouble("Respawn.z"),
-            config.getDouble("Respawn.yaw").toFloat(),
-            config.getDouble("Respawn.pitch").toFloat()
+    private fun getLocationFromFile(path: String, config: FileConfiguration): Location {
+        return Location(
+            Bukkit.getWorld(config.getString("$path.world")),
+            config.getDouble("$path.x"),
+            config.getDouble("$path.y"),
+            config.getDouble("$path.z"),
+            config.getDouble("$path.yaw").toFloat(),
+            config.getDouble("$path.pitch").toFloat()
         )
     }
 }

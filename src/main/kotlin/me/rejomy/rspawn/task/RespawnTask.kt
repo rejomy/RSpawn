@@ -1,9 +1,11 @@
 package me.rejomy.rspawn.task
 
 import me.rejomy.rspawn.INSTANCE
-import me.rejomy.rspawn.ar
+import me.rejomy.rspawn.antirelog
 import me.rejomy.rspawn.listener.cooldown
-import me.rejomy.rspawn.util.respawnPlayer
+import me.rejomy.rspawn.util.PlayerUtil
+import me.rejomy.rspawn.util.TitleUtil
+import me.rejomy.rspawn.util.Utils
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerRespawnEvent
@@ -13,45 +15,48 @@ class RespawnTask(
     private var delay: Int,
     val player: Player,
 ) {
+
     lateinit var task: BukkitTask
+
     fun run() {
+        // If player not in the server for any reason, stop scheduler.
+        // We will run it again if he join back with his cached cooldown.
         if (!player.isOnline) {
             task.cancel()
-        } else if(delay < 1) {
-            player.sendTitle(
-                INSTANCE.config.getString("Prevent death.Rebirth.title").replace("&", "§"),
-                INSTANCE.config.getString("Prevent death.Rebirth.subtitle").replace("&", "§")
+        } else if (--delay < 1) {
+            TitleUtil.displayTitle(player,
+                INSTANCE.config.getString("rebirth.title").replace("&", "§"),
+                INSTANCE.config.getString("rebirth.subtitle").replace("&", "§"),
+                10, 30, 10
             )
 
-            if (ar != null && ar!!.pvpManager.isInPvP(player)) {
-                ar!!.pvpManager.stopPvP(player)
+            if (antirelog != null && antirelog!!.pvpManager.isInPvP(player)) {
+                antirelog!!.pvpManager.stopPvP(player)
             }
 
             Bukkit.getPluginManager().callEvent(PlayerRespawnEvent(player, INSTANCE.respawn, false))
 
-            player.exp = 0F
-
-            respawnPlayer(player)
+            Utils.teleportToRespawn(player)
 
             Bukkit.dispatchCommand(
                 Bukkit.getConsoleSender(),
-                "gamemode " + INSTANCE.config.getString("Prevent death.Rebirth.post-gamemode") + " " + player.name
+                "gamemode " + INSTANCE.config.getString("rebirth.post-gamemode") + " " + player.name
             )
 
+            PlayerUtil.resetVariables(player)
             cooldown.remove(player.name)
-
             task.cancel()
         } else {
-            delay -= 1
-
             cooldown[player.name] = delay
 
-            player.sendTitle(
-                INSTANCE.config.getString("Prevent death.Rebirth.Delay.title").replace("&", "§"),
-                INSTANCE.config.getString("Prevent death.Rebirth.Delay.subtitle")
+            TitleUtil.displayTitle(player,
+                INSTANCE.config.getString("rebirth.delay.title").replace("&", "§"),
+                INSTANCE.config.getString("rebirth.delay.subtitle")
                     .replace("\$delay", "$delay")
-                    .replace("&", "§")
+                    .replace("&", "§"),
+                3, 40, 3
             )
         }
     }
+
 }
