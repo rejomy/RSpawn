@@ -7,6 +7,7 @@ import me.rejomy.rspawn.util.Utils
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.PlayerRespawnEvent
 
 class RespawnListener : Listener {
@@ -34,7 +35,13 @@ class RespawnListener : Listener {
 
         // Run respawn timer after respawn.
         if (preventDeath) {
-            PreventDeathHandler(player, player.lastDamageCause.cause)
+            // I dont know how is it possible, but it happens, so set CUSTOM cause if player are respawn.
+            val damageCause = if (player.lastDamageCause != null)
+                player.lastDamageCause.cause
+            else
+                EntityDamageEvent.DamageCause.CUSTOM
+
+            PreventDeathHandler(player, damageCause)
         }
     }
 }
