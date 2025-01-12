@@ -6,9 +6,11 @@ import org.bukkit.entity.Player
 object TitleUtil {
 
     fun displayTitle(player: Player, header: String, footer: String, fadeIn: Int, time: Int, fadeOut: Int) {
-        if (PacketEventsHook.enable) {
-            PacketEventsHook.packetEventsAPI.playerManager.getUser(player).sendTitle(header, footer, fadeOut, time, fadeIn)
-        } else {
+        val sendByPacketEvents = PacketEventsHook.enable &&
+                PacketEventsHook.packetEventsAPI.playerManager.getUser(player)
+                    ?.sendTitle(header, footer, fadeOut, time, fadeIn) != null;
+
+        if (!sendByPacketEvents) {
             if (ServerVersionUtil.newerThan18()) {
                 player.sendTitle(header, footer, fadeIn, time, fadeOut)
             } else {
