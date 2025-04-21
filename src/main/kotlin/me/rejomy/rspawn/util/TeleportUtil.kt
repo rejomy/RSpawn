@@ -24,9 +24,9 @@ object TeleportUtil {
         if (Bukkit.isPrimaryThread()) {
             player.teleport(location)
         } else {
-            Bukkit.getScheduler().runTask(INSTANCE) {
+            Bukkit.getScheduler().runTask(INSTANCE, Runnable {
                 player.teleport(location)
-            }
+            })
         }
     }
 }

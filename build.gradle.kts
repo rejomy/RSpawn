@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.1.0"
+    kotlin("jvm") version "2.1.20"
 }
 
 group = "me.rejomy"
@@ -11,6 +11,16 @@ tasks.withType<JavaCompile>().configureEach {
 
 repositories {
     mavenCentral()
+
+    maven {
+        name = "spigotmc-repo"
+        url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
+    }
+    maven {
+        name = "sonatype"
+        url = uri("https://oss.sonatype.org/content/groups/public/")
+    }
+
     maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
     maven { url = uri("https://repo.codemc.io/repository/maven-snapshots/") }
     maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
@@ -26,7 +36,7 @@ dependencies {
         include("*.jar")
     })
 
-    compileOnly("org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT")
+    compileOnly("org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly("com.github.retrooper:packetevents-spigot:2.7.0")
 }
 

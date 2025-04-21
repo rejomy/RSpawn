@@ -15,7 +15,7 @@ class CommandListener : Listener {
 
         if (blockCommands && respawning) {
             player.sendMessage(
-                INSTANCE.config.getString("rebirth.block-commands-message").replace("&", "§")
+                INSTANCE.config.getString("rebirth.block-commands-message")?.replace("&", "§")
             )
             event.isCancelled = true
         }

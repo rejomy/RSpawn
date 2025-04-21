@@ -5,13 +5,16 @@ import me.rejomy.rspawn.listener.cooldown
 import me.rejomy.rspawn.listener.damager
 import me.rejomy.rspawn.task.RespawnTask
 import org.bukkit.*
+import org.bukkit.damage.DamageSource
+import org.bukkit.damage.DamageType
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 
-class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCause?) {
+class PreventDeathHandler(val player: Player, cause: DamageCause?) {
 
     private val loc: Location = player.location
     private val name: String = player.name
@@ -24,7 +27,7 @@ class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCau
             next = true
 
             val lastPlayerDamager = if (damager.containsKey(player.name)) damager[player.name]!! else "Player"
-            dname = if (cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK) lastPlayerDamager else cause.name
+            dname = if (cause == DamageCause.ENTITY_ATTACK) lastPlayerDamager else cause.name
 
             val drops = player.inventory.contents.toMutableList()
             drops.addAll(player.inventory.armorContents.toList())
@@ -34,17 +37,17 @@ class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCau
             // call death event
             Bukkit.getPluginManager().callEvent(
                 PlayerDeathEvent(
-                    player,
+                    player, DamageSource.builder(DamageType.PLAYER_ATTACK).build(),
                     drops, player.expToLevel, "Player has been killed $dname"
                 )
             )
 
             drops.forEach {
-                loc.world.dropItemNaturally(loc, it)
+                loc.world!!.dropItemNaturally(loc, it)
             }
 
             player.inventory.clear()
-            player.itemOnCursor = null
+            player.setItemOnCursor(null)
             player.inventory.armorContents =
                 arrayOf(
                     ItemStack(Material.AIR),
@@ -53,7 +56,7 @@ class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCau
                     ItemStack(Material.AIR)
                 )
             if (ServerVersionUtil.newerThan18()) {
-                player.inventory.itemInOffHand = null
+                player.inventory.setItemInOffHand(null)
             }
 
             //damage effect
@@ -74,7 +77,7 @@ class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCau
                 )
 
                 if (cause != null) {
-                    if (cause == EntityDamageEvent.DamageCause.VOID) {
+                    if (cause == DamageCause.VOID) {
                         player.teleport(INSTANCE.respawn!!.clone().add(0.0, 0.0, 0.0))
                         // Reset velocity cuz in fight pl it set y motion and player fall under ground.
                         player.velocity = Vector(0, 0, 0)
@@ -84,19 +87,19 @@ class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCau
 
                     TitleUtil.displayTitle(
                         player,
-                        INSTANCE.config.getString("death.title").replace("&", "§"),
-                        INSTANCE.config.getString("death.subtitle").replace("\$killer", dname).replace("&", "§"),
+                        INSTANCE.config.getString("death.title")!!.replace("&", "§"),
+                        INSTANCE.config.getString("death.subtitle")!!.replace("\$killer", dname).replace("&", "§"),
                         3, 20, 3
                     )
                 }
 
                 val task = RespawnTask(respawnDelay, player);
-                val taskRun = Bukkit.getScheduler().runTaskTimer(INSTANCE, { task.run() }, 20L, 20L)
+                val taskRun = Bukkit.getScheduler().runTaskTimer(INSTANCE, task, 20L, 20L)
                 task.task = taskRun
             } else {
                 // If cooldown contains player name (rebirth enable, but player respawn delay is zero)
                 cooldown.remove(player.name)
-                player.teleport(INSTANCE.respawn)
+                player.teleport(INSTANCE.respawn!!)
             }
 
             if (cause != null) {
@@ -105,11 +108,11 @@ class PreventDeathHandler(val player: Player, cause: EntityDamageEvent.DamageCau
                 // set statistic
                 player.setStatistic(Statistic.DEATHS, player.getStatistic(Statistic.DEATHS) + 1)
 
-                if (damager[player.name] != null && Bukkit.getPlayer(damager[player.name]) != null)
-                    Bukkit.getPlayer(damager[player.name]!!)
+                if (damager[player.name] != null && Bukkit.getPlayer(damager[player.name]!!) != null)
+                    Bukkit.getPlayer(damager[player.name]!!)!!
                         .setStatistic(
                             Statistic.PLAYER_KILLS,
-                            Bukkit.getPlayer(damager[player.name]!!).getStatistic(Statistic.PLAYER_KILLS) + 1
+                            Bukkit.getPlayer(damager[player.name]!!)!!.getStatistic(Statistic.PLAYER_KILLS) + 1
                         )
             }
 

@@ -30,8 +30,7 @@ class Spawn : CommandExecutor {
                     && cooldown.containsKey(sender.name)
                 ) {
                     sender.sendMessage(
-                        INSTANCE.config.getString("rebirth.block-commands-message")
-                            .replace("&", "§")
+                        INSTANCE.config.getString("rebirth.block-commands-message")?.replace("&", "§")
                     )
                     return false;
                 }
@@ -45,8 +44,8 @@ class Spawn : CommandExecutor {
                 val player: Player = sender
                 TeleportUtil.teleportToSpawn(player)
                 TitleUtil.displayTitle(player,
-                    INSTANCE.config.getString("teleport.title").replace("&", "§"),
-                    INSTANCE.config.getString("teleport.subtitle").replace("&", "§"),
+                    INSTANCE.config.getString("teleport.title")!!.replace("&", "§"),
+                    INSTANCE.config.getString("teleport.subtitle")!!.replace("&", "§"),
                     5, 40, 5
                 )
 
@@ -127,7 +126,7 @@ class Spawn : CommandExecutor {
         val file = File(INSTANCE.dataFolder, File.separator + "location.yml")
         val config: FileConfiguration = YamlConfiguration.loadConfiguration(file)
 
-        config.set("$path.world", location.world.name)
+        config.set("$path.world", location.world!!.name)
         config.set("$path.x", location.x)
         config.set("$path.y", location.y)
         config.set("$path.z", location.z)

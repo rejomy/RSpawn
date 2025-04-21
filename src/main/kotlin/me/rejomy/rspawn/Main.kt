@@ -69,14 +69,14 @@ class Main : JavaPlugin() {
             Bukkit.getPluginManager().registerEvents(it, this)
         }
 
-        getCommand("spawn").executor = Spawn()
+        getCommand("spawn")!!.setExecutor(Spawn())
         if (config.getBoolean("register-kill-command"))
-            getCommand("kill").executor = KillPlayer()
+            getCommand("kill")!!.setExecutor(KillPlayer())
     }
 
     private fun getLocationFromFile(path: String, config: FileConfiguration): Location {
         return Location(
-            Bukkit.getWorld(config.getString("$path.world")),
+            Bukkit.getWorld(config.getString("$path.world")!!),
             config.getDouble("$path.x"),
             config.getDouble("$path.y"),
             config.getDouble("$path.z"),

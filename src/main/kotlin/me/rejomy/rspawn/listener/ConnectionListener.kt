@@ -20,7 +20,7 @@ class ConnectionListener : Listener {
                 TeleportUtil.teleportToSpawn(player)
             }
         } else if (INSTANCE.config.getBoolean("teleport.join.first")) {
-            Bukkit.getScheduler().runTaskLater(INSTANCE, { player.teleport(INSTANCE.spawn) }, 2)
+            Bukkit.getScheduler().runTaskLater(INSTANCE, Runnable { player.teleport(INSTANCE.spawn!!) }, 2)
         }
 
         // Run check that player before was killed and his cool-down is not elapsed.

@@ -37,7 +37,7 @@ class RespawnListener : Listener {
         if (preventDeath) {
             // I dont know how is it possible, but it happens, so set CUSTOM cause if player are respawn.
             val damageCause = if (player.lastDamageCause != null)
-                player.lastDamageCause.cause
+                player.lastDamageCause!!.cause
             else
                 EntityDamageEvent.DamageCause.CUSTOM
 

@@ -11,7 +11,7 @@ class DeathListener : Listener {
 
     @EventHandler
     fun onDeath(event: PlayerDeathEvent) {
-        val player = event.entity.player
+        val player = event.entity.player!!
         val world = player.world.name
         val isInDuel = duel != null && duel!!.arenaManager.isInMatch(player)
         val isInDisabledWorld = INSTANCE.disableWorlds.any { it == world }

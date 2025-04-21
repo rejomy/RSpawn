@@ -14,19 +14,19 @@ import org.bukkit.scheduler.BukkitTask
 class RespawnTask(
     private var delay: Int,
     val player: Player,
-) {
+): Runnable {
 
     lateinit var task: BukkitTask
 
-    fun run() {
+    override fun run() {
         // If player not in the server for any reason, stop scheduler.
         // We will run it again if he join back with his cached cooldown.
         if (!player.isOnline) {
             task.cancel()
         } else if (--delay < 1) {
             TitleUtil.displayTitle(player,
-                INSTANCE.config.getString("rebirth.title").replace("&", "§"),
-                INSTANCE.config.getString("rebirth.subtitle").replace("&", "§"),
+                INSTANCE.config.getString("rebirth.title")!!.replace("&", "§"),
+                INSTANCE.config.getString("rebirth.subtitle")!!.replace("&", "§"),
                 10, 30, 10
             )
 
@@ -34,7 +34,7 @@ class RespawnTask(
                 antirelog!!.pvpManager.stopPvP(player)
             }
 
-            Bukkit.getPluginManager().callEvent(PlayerRespawnEvent(player, INSTANCE.respawn, false))
+            Bukkit.getPluginManager().callEvent(PlayerRespawnEvent(player, INSTANCE.respawn!!, false))
 
             Utils.teleportToRespawn(player)
 
@@ -50,8 +50,8 @@ class RespawnTask(
             cooldown[player.name] = delay
 
             TitleUtil.displayTitle(player,
-                INSTANCE.config.getString("rebirth.delay.title").replace("&", "§"),
-                INSTANCE.config.getString("rebirth.delay.subtitle")
+                INSTANCE.config.getString("rebirth.delay.title")!!.replace("&", "§"),
+                INSTANCE.config.getString("rebirth.delay.subtitle")!!
                     .replace("\$delay", "$delay")
                     .replace("&", "§"),
                 3, 40, 3
