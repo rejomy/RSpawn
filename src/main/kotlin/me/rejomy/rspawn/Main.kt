@@ -1,6 +1,6 @@
 package me.rejomy.rspawn
 
-import me.realized.duels.api.Duels
+import com.meteordevelopments.duels.api.Duels
 import me.rejomy.rspawn.command.KillPlayer
 import me.rejomy.rspawn.command.Spawn
 import me.rejomy.rspawn.listener.*
