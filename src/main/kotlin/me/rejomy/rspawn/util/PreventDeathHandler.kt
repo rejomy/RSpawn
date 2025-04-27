@@ -8,9 +8,9 @@ import org.bukkit.*
 import org.bukkit.damage.DamageSource
 import org.bukkit.damage.DamageType
 import org.bukkit.entity.Player
-import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause
 import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.event.player.PlayerRespawnEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 
@@ -97,6 +97,13 @@ class PreventDeathHandler(val player: Player, cause: DamageCause?) {
                 val taskRun = Bukkit.getScheduler().runTaskTimer(INSTANCE, task, 20L, 20L)
                 task.task = taskRun
             } else {
+                // Mask the respawn, we need add cooldown because in RespawnEvent we are checking that it is not our respawn to apply respawn effect.
+                cooldown[player.name] = 0
+                // Call the respawn event.
+                Bukkit.getPluginManager().callEvent(
+                    PlayerRespawnEvent(player, INSTANCE.respawn!!, false, false,
+                    PlayerRespawnEvent.RespawnReason.PLUGIN)
+                )
                 // If cooldown contains player name (rebirth enable, but player respawn delay is zero)
                 cooldown.remove(player.name)
                 player.teleport(INSTANCE.respawn!!)

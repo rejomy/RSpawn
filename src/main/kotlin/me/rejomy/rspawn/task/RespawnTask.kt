@@ -16,13 +16,13 @@ class RespawnTask(
     val player: Player,
 ): Runnable {
 
-    lateinit var task: BukkitTask
+    var task: BukkitTask? = null
 
     override fun run() {
         // If player not in the server for any reason, stop scheduler.
         // We will run it again if he join back with his cached cooldown.
         if (!player.isOnline) {
-            task.cancel()
+            task?.cancel()
         } else if (--delay < 1) {
             TitleUtil.displayTitle(player,
                 INSTANCE.config.getString("rebirth.title")!!.replace("&", "§"),
@@ -34,7 +34,8 @@ class RespawnTask(
                 antirelog!!.pvpManager.stopPvP(player)
             }
 
-            Bukkit.getPluginManager().callEvent(PlayerRespawnEvent(player, INSTANCE.respawn!!, false))
+            Bukkit.getPluginManager().callEvent(PlayerRespawnEvent(player, INSTANCE.respawn!!, false, false,
+                PlayerRespawnEvent.RespawnReason.PLUGIN))
 
             Utils.teleportToRespawn(player)
 
@@ -45,7 +46,7 @@ class RespawnTask(
 
             PlayerUtil.resetVariables(player)
             cooldown.remove(player.name)
-            task.cancel()
+            task?.cancel()
         } else {
             cooldown[player.name] = delay
 
@@ -58,5 +59,4 @@ class RespawnTask(
             )
         }
     }
-
 }
