@@ -11,21 +11,15 @@ tasks.withType<JavaCompile>().configureEach {
 
 repositories {
     mavenCentral()
-
-    maven {
-        name = "spigotmc-repo"
-        url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
-    }
-    maven {
-        name = "sonatype"
-        url = uri("https://oss.sonatype.org/content/groups/public/")
-    }
-
     maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
     maven { url = uri("https://repo.codemc.io/repository/maven-snapshots/") }
-    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
+    maven { url = uri("https://jitpack.io") } // Add this line for Vault
     maven { url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/") }
-    maven { url = uri("https://jitpack.io") }
+
+    maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://oss.sonatype.org/content/groups/public/")
+
+
     flatDir {
         dirs("lib")
     }
@@ -36,18 +30,7 @@ dependencies {
         include("*.jar")
     })
 
-    compileOnly("org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly("com.github.retrooper:packetevents-spigot:2.7.0")
-}
-
-
-tasks.processResources {
-    doFirst {
-        file("$buildDir/main").listFiles()?.forEach { it.delete() }
-    }
-}
-
-tasks.compileKotlin {
-    kotlinOptions.jvmTarget = "17"
 }
 

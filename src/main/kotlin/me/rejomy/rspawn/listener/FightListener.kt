@@ -4,7 +4,6 @@ import me.rejomy.rspawn.INSTANCE
 import me.rejomy.rspawn.antirelog
 import me.rejomy.rspawn.duel
 import me.rejomy.rspawn.util.PreventDeathHandler
-import me.rejomy.rspawn.util.ServerVersionUtil
 import me.rejomy.rspawn.util.TeleportUtil
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Monster
@@ -34,7 +33,8 @@ class FightListener : Listener {
         val isInDisabledWorld = INSTANCE.disableWorlds.any { it == player.world.name }
         val isInPvP = antirelog != null && antirelog!!.pvpManager.isInPvP(player)
         val respawning = cooldown.containsKey(player.name) // Prevent to damage peoples who are respawning.
-        val teleportIfFall = INSTANCE.config.getBoolean("teleport.fall") && !isInPvP
+        val teleportIfFall = INSTANCE.config.getBoolean("teleport.fall") && !isInPvP &&
+                INSTANCE.config.getDouble("teleport.fall-min-y-level") >= location.y
 
         if (isInDisabledWorld || isInDuel) {
             return
@@ -42,18 +42,9 @@ class FightListener : Listener {
 
         // Handle fall check
         if (teleportIfFall) {
-            // Versions before 1.17 does not have negative height.
-            var minYHeight = 0
-
-            if (ServerVersionUtil.newerThanOrEquals(117)) {
-                minYHeight = -65
-            }
-
-            if (location.y < minYHeight) {
-                TeleportUtil.teleportToSpawn(player)
-                event.isCancelled = true
-                return
-            }
+            TeleportUtil.teleportToSpawn(player)
+            event.isCancelled = true
+            return
         }
 
         if (respawning) {

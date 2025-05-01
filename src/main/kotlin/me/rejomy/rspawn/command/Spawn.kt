@@ -30,7 +30,7 @@ class Spawn : CommandExecutor {
                     && cooldown.containsKey(sender.name)
                 ) {
                     sender.sendMessage(
-                        INSTANCE.config.getString("rebirth.block-commands-message")?.replace("&", "§")
+                        INSTANCE.config.getString("rebirth.block-commands-message")?.replace("&", "§")!!
                     )
                     return false;
                 }

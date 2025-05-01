@@ -17,8 +17,11 @@ teleport:
   join:
     first: false
     after-first: true
-  # Teleport player to the spawn when is falling.
+  # Teleport player to the spawn when is falling. (Receive void-damage in EntityDamageEvent)
   fall: true
+  # If level higher than this, we will not teleport him to the spawn.
+  fall-min-y-level: -75
+
 
   title: "Boom!"
   subtitle: "You were teleported to the spawn"

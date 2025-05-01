@@ -14,9 +14,7 @@ class CommandListener : Listener {
         val respawning = cooldown.containsKey(player.name);
 
         if (blockCommands && respawning) {
-            player.sendMessage(
-                INSTANCE.config.getString("rebirth.block-commands-message")?.replace("&", "§")
-            )
+            player.sendMessage(INSTANCE.config.getString("rebirth.block-commands-message")?.replace("&", "§")!!)
             event.isCancelled = true
         }
     }

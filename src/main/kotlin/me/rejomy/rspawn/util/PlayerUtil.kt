@@ -12,7 +12,7 @@ object PlayerUtil {
 
     fun resetVariables(player: Player) {
         player.foodLevel = 20
-        player.health = player.maxHealth
+        player.health = player.healthScale
         player.exp = 0F
     }
 }

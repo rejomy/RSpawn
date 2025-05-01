@@ -1,18 +1,21 @@
 package me.rejomy.rspawn.listener
 
+import io.papermc.paper.event.player.AsyncChatEvent
 import me.rejomy.rspawn.INSTANCE
 import me.rejomy.rspawn.antirelog
 import me.rejomy.rspawn.duel
 import me.rejomy.rspawn.util.TeleportUtil
+import net.kyori.adventure.text.TextComponent
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.player.AsyncPlayerChatEvent
 
 class ChatListener : Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
-    fun onChat(event: AsyncPlayerChatEvent) {
+    fun onChat(event: AsyncChatEvent) {
         if (!INSTANCE.config.getBoolean("chat")) {
             return
         }
@@ -30,8 +33,9 @@ class ChatListener : Listener {
             return
         }
 
-        if (arrayOf("spawn", "spaw", "spwn", "spw", "sawn", "pawn", "ызфцт", "ызфц")
-            .contains(removeSpecialCharacter(event.message))) {
+        if (arrayOf("spawn", "spaw", "spwn", "spw", "sawn", "pawn", "spanw", "ызфцт", "ызфц")
+            .contains(
+                removeSpecialCharacter(PlainTextComponentSerializer.plainText().serialize(event.message())))) {
             event.isCancelled = true
             TeleportUtil.teleportToSpawn(player)
         }

@@ -1,7 +1,6 @@
 package me.rejomy.rspawn.util
 
 import me.rejomy.rspawn.INSTANCE
-import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 
@@ -20,13 +19,6 @@ object TeleportUtil {
             throw NullPointerException("Provided location is null.")
         }
 
-        // Safety teleports.
-        if (Bukkit.isPrimaryThread()) {
-            player.teleport(location)
-        } else {
-            Bukkit.getScheduler().runTask(INSTANCE, Runnable {
-                player.teleport(location)
-            })
-        }
+        player.teleportAsync(location)
     }
 }

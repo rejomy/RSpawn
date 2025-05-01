@@ -1,9 +1,11 @@
 package me.rejomy.rspawn.util
 
+import com.google.common.collect.ImmutableSet
 import me.rejomy.rspawn.INSTANCE
 import me.rejomy.rspawn.listener.cooldown
 import me.rejomy.rspawn.listener.damager
 import me.rejomy.rspawn.task.RespawnTask
+import net.kyori.adventure.text.Component
 import org.bukkit.*
 import org.bukkit.damage.DamageSource
 import org.bukkit.damage.DamageType
@@ -11,6 +13,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerRespawnEvent
+import org.bukkit.event.player.PlayerRespawnEvent.RespawnFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 
@@ -38,12 +41,13 @@ class PreventDeathHandler(val player: Player, cause: DamageCause?) {
             Bukkit.getPluginManager().callEvent(
                 PlayerDeathEvent(
                     player, DamageSource.builder(DamageType.PLAYER_ATTACK).build(),
-                    drops, player.expToLevel, "Player has been killed $dname"
+                    drops, player.expToLevel, Component.text("Player has been killed $dname")
                 )
             )
 
             drops.forEach {
-                loc.world!!.dropItemNaturally(loc, it)
+                if (it != null)
+                    loc.world!!.dropItemNaturally(loc, it)
             }
 
             player.inventory.clear()
@@ -55,10 +59,8 @@ class PreventDeathHandler(val player: Player, cause: DamageCause?) {
                     ItemStack(Material.AIR),
                     ItemStack(Material.AIR)
                 )
-            if (ServerVersionUtil.newerThan18()) {
-                player.inventory.setItemInOffHand(null)
-            }
 
+            player.inventory.setItemInOffHand(null)
             //damage effect
             player.damage(0.0)
         } else if (cooldown.containsKey(name)) {
@@ -101,9 +103,12 @@ class PreventDeathHandler(val player: Player, cause: DamageCause?) {
                 cooldown[player.name] = 0
                 // Call the respawn event.
                 Bukkit.getPluginManager().callEvent(
-                    PlayerRespawnEvent(player, INSTANCE.respawn!!, false, false,
-                    PlayerRespawnEvent.RespawnReason.PLUGIN)
+                    PlayerRespawnEvent(player, INSTANCE.respawn!!, false, false, false,
+                        PlayerRespawnEvent.RespawnReason.PLUGIN,
+                        ImmutableSet.builder<RespawnFlag?>().add(RespawnFlag.BED_SPAWN)
+                    )
                 )
+
                 // If cooldown contains player name (rebirth enable, but player respawn delay is zero)
                 cooldown.remove(player.name)
                 player.teleport(INSTANCE.respawn!!)
