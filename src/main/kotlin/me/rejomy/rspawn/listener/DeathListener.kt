@@ -22,7 +22,8 @@ class DeathListener : Listener {
         }
 
         if (INSTANCE.config.getBoolean("death.auto-respawn")) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(INSTANCE, {
+            // Run respawn task in the next tick.
+            Bukkit.getScheduler().runTaskLater(INSTANCE, Runnable {
                 player.spigot().respawn()
             }, 1)
         }

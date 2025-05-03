@@ -13,7 +13,6 @@ import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerRespawnEvent
-import org.bukkit.event.player.PlayerRespawnEvent.RespawnFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 
@@ -73,15 +72,12 @@ class PreventDeathHandler(val player: Player, cause: DamageCause?) {
             val respawnDelayIsPositive = respawnDelay > 0
 
             if (INSTANCE.config.getBoolean("rebirth.enable") && respawnDelayIsPositive) {
-                Bukkit.dispatchCommand(
-                    Bukkit.getConsoleSender(),
-                    "gamemode " + INSTANCE.config.getString("rebirth.pre-gamemode") + " " + player.name
-                )
+                player.gameMode = GameMode.valueOf(INSTANCE.config.getString("rebirth.pre-gamemode")!!.uppercase())
 
                 if (cause != null) {
                     if (cause == DamageCause.VOID) {
                         player.teleport(INSTANCE.respawn!!.clone().add(0.0, 0.0, 0.0))
-                        // Reset velocity cuz in fight pl it set y motion and player fall under ground.
+                        // Reset velocity cuz in fight pl it set y motion and player fall underground.
                         player.velocity = Vector(0, 0, 0)
                     }
 
@@ -105,7 +101,7 @@ class PreventDeathHandler(val player: Player, cause: DamageCause?) {
                 Bukkit.getPluginManager().callEvent(
                     PlayerRespawnEvent(player, INSTANCE.respawn!!, false, false, false,
                         PlayerRespawnEvent.RespawnReason.PLUGIN,
-                        ImmutableSet.builder<RespawnFlag?>().add(RespawnFlag.BED_SPAWN)
+                        ImmutableSet.builder()
                     )
                 )
 

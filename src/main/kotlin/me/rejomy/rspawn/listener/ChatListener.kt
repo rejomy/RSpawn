@@ -8,9 +8,11 @@ import me.rejomy.rspawn.util.TeleportUtil
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import org.bukkit.command.PluginCommand
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import java.util.*
 
 class ChatListener : Listener {
 
@@ -33,9 +35,14 @@ class ChatListener : Listener {
             return
         }
 
-        if (arrayOf("spawn", "spaw", "spwn", "spw", "sawn", "pawn", "spanw", "ызфцт", "ызфц")
-            .contains(
-                removeSpecialCharacter(PlainTextComponentSerializer.plainText().serialize(event.message())))) {
+        val spawnCommand = INSTANCE.getCommand("spawn")
+        if (spawnCommand!!.aliases.contains(
+                removeSpecialCharacter(
+                    PlainTextComponentSerializer.plainText().serialize(event.message())
+                        .lowercase(Locale.getDefault())
+                )
+            )
+        ) {
             event.isCancelled = true
             TeleportUtil.teleportToSpawn(player)
         }

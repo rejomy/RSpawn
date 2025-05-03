@@ -1,5 +1,6 @@
 package me.rejomy.rspawn.task
 
+import com.google.common.collect.ImmutableSet
 import me.rejomy.rspawn.INSTANCE
 import me.rejomy.rspawn.antirelog
 import me.rejomy.rspawn.listener.cooldown
@@ -7,6 +8,7 @@ import me.rejomy.rspawn.util.PlayerUtil
 import me.rejomy.rspawn.util.TitleUtil
 import me.rejomy.rspawn.util.Utils
 import org.bukkit.Bukkit
+import org.bukkit.GameMode
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerRespawnEvent
 import org.bukkit.scheduler.BukkitTask
@@ -34,20 +36,25 @@ class RespawnTask(
                 antirelog!!.pvpManager.stopPvP(player)
             }
 
-            Bukkit.getPluginManager().callEvent(PlayerRespawnEvent(player, INSTANCE.respawn!!, false, false,
-                PlayerRespawnEvent.RespawnReason.PLUGIN))
-
-            Utils.teleportToRespawn(player)
-
-            Bukkit.dispatchCommand(
-                Bukkit.getConsoleSender(),
-                "gamemode " + INSTANCE.config.getString("rebirth.post-gamemode") + " " + player.name
+            // Call the respawn event.
+            Bukkit.getPluginManager().callEvent(
+                PlayerRespawnEvent(player, INSTANCE.respawn!!, false, false, false,
+                    PlayerRespawnEvent.RespawnReason.PLUGIN,
+                    ImmutableSet.builder()
+                )
             )
 
+            Utils.teleportToRespawn(player)
             PlayerUtil.resetVariables(player)
+            player.gameMode = GameMode.valueOf(INSTANCE.config.getString("rebirth.post-gamemode")!!.uppercase())
             cooldown.remove(player.name)
             task?.cancel()
         } else {
+            // This check force player to have respawn gamemode during respawning.
+            val respawnGameMode = GameMode.valueOf(INSTANCE.config.getString("rebirth.pre-gamemode")!!.uppercase());
+            if (respawnGameMode != player.gameMode)
+                player.gameMode = respawnGameMode
+
             cooldown[player.name] = delay
 
             TitleUtil.displayTitle(player,

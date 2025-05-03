@@ -11,6 +11,7 @@ commands:
   spawn:
     aliases:
       - spaw
+      - spawnn
       - spa
       - span
       - spwn

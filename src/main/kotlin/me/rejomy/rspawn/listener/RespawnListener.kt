@@ -12,7 +12,7 @@ import org.bukkit.event.player.PlayerRespawnEvent
 
 class RespawnListener : Listener {
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun onRespawn(event: PlayerRespawnEvent) {
         val player = event.player
         val world = player.world.name
@@ -35,12 +35,7 @@ class RespawnListener : Listener {
 
         // Run respawn timer after respawn.
         if (preventDeath) {
-            // I dont know how is it possible, but it happens, so set CUSTOM cause if player are respawn.
-            val damageCause = if (player.lastDamageCause != null)
-                player.lastDamageCause!!.cause
-            else
-                EntityDamageEvent.DamageCause.CUSTOM
-
+            val damageCause = player.lastDamageCause?.cause ?: EntityDamageEvent.DamageCause.CUSTOM
             PreventDeathHandler(player, damageCause)
         }
     }

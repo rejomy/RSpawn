@@ -47,6 +47,8 @@ rebirth:
   prevent-posses-players-in-spectator: true
   # Prevent interact with any items and entities while player is respawning.
   prevent-interact: true
+  # Prevent item pickup during respawning.
+  cancel-pickup-during-respawning: true
 
   block-commands: true
   block-commands-message: "&f▶ &7Вы не можете использовать команды во время возраждения&f!"

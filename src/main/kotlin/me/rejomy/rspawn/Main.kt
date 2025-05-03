@@ -64,6 +64,7 @@ class Main : JavaPlugin() {
             CommandListener(),
             ChatListener(),
             InteractListener(),
+            PickupListener(),
             TeleportListener(),
         ).forEach {
             Bukkit.getPluginManager().registerEvents(it, this)
