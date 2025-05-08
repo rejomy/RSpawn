@@ -107,6 +107,8 @@ class PreventDeathHandler(val player: Player, cause: DamageCause?) {
 
                 // If cooldown contains player name (rebirth enable, but player respawn delay is zero)
                 cooldown.remove(player.name)
+                // Reset fall distance to prevent accident deaths if player have some
+                player.fallDistance = 0F
                 player.teleport(INSTANCE.respawn!!)
             }
 

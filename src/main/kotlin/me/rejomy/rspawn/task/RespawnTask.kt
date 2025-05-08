@@ -44,6 +44,8 @@ class RespawnTask(
                 )
             )
 
+            // Reset fall distance to prevent accident deaths if player have some
+            player.fallDistance = 0F
             Utils.teleportToRespawn(player)
             PlayerUtil.resetVariables(player)
             player.gameMode = GameMode.valueOf(INSTANCE.config.getString("rebirth.post-gamemode")!!.uppercase())
