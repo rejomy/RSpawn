@@ -40,7 +40,13 @@ class PreventDeathHandler(val player: Player, cause: DamageCause?) {
             Bukkit.getPluginManager().callEvent(
                 PlayerDeathEvent(
                     player, DamageSource.builder(DamageType.PLAYER_ATTACK).build(),
-                    drops, player.expToLevel, Component.text("Player has been killed $dname")
+                    drops, player.expToLevel,
+                    0,
+                    0,
+                    0,
+                    Component.text("Player has been killed $dname"),
+                    false,
+                    true
                 )
             )
 
@@ -100,8 +106,7 @@ class PreventDeathHandler(val player: Player, cause: DamageCause?) {
                 // Call the respawn event.
                 Bukkit.getPluginManager().callEvent(
                     PlayerRespawnEvent(player, INSTANCE.respawn!!, false, false, false,
-                        PlayerRespawnEvent.RespawnReason.PLUGIN,
-                        ImmutableSet.builder()
+                        PlayerRespawnEvent.RespawnReason.PLUGIN
                     )
                 )
 

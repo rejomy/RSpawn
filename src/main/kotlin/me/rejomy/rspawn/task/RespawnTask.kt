@@ -39,8 +39,7 @@ class RespawnTask(
             // Call the respawn event.
             Bukkit.getPluginManager().callEvent(
                 PlayerRespawnEvent(player, INSTANCE.respawn!!, false, false, false,
-                    PlayerRespawnEvent.RespawnReason.PLUGIN,
-                    ImmutableSet.builder()
+                    PlayerRespawnEvent.RespawnReason.PLUGIN
                 )
             )
 
