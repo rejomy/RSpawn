@@ -1,6 +1,5 @@
 package me.rejomy.rspawn.util
 
-import com.google.common.collect.ImmutableSet
 import me.rejomy.rspawn.INSTANCE
 import me.rejomy.rspawn.listener.cooldown
 import me.rejomy.rspawn.listener.damager
@@ -34,6 +33,8 @@ class PreventDeathHandler(val player: Player, cause: DamageCause?) {
             val drops = player.inventory.contents.toMutableList()
             drops.addAll(player.inventory.armorContents.toList())
             drops.add(player.itemOnCursor)
+
+            // Clear invalid items before pass to the event
             drops.removeIf { it == null || it.type == Material.AIR }
 
             // call death event
@@ -50,22 +51,20 @@ class PreventDeathHandler(val player: Player, cause: DamageCause?) {
                 )
             )
 
-            drops.forEach {
-                if (it != null)
-                    loc.world!!.dropItemNaturally(loc, it)
-            }
+            PlayerUtil.dropExperience(loc, player.totalExperience)
+
+            drops
+                .filter { it != null && it.type != Material.AIR }
+                .forEach {
+                    if (it != null)
+                        loc.world!!.dropItemNaturally(loc, it)
+                }
 
             player.inventory.clear()
-            player.setItemOnCursor(null)
-            player.inventory.armorContents =
-                arrayOf(
-                    ItemStack(Material.AIR),
-                    ItemStack(Material.AIR),
-                    ItemStack(Material.AIR),
-                    ItemStack(Material.AIR)
-                )
-
+            player.inventory.armorContents = Array(4) { ItemStack(Material.AIR) }
             player.inventory.setItemInOffHand(null)
+            player.setItemOnCursor(null)
+
             //damage effect
             player.damage(0.0)
         } else if (cooldown.containsKey(name)) {
@@ -74,7 +73,7 @@ class PreventDeathHandler(val player: Player, cause: DamageCause?) {
 
         if (next) {
             val respawnDelay = cooldown.getOrElse(player.name) { Utils.getRespawnDelay(player) }
-            // If player respawn delay is zero or negative, we should respawn him immediately.
+            // If a player respawn delay is zero or negative, we should respawn him immediately.
             val respawnDelayIsPositive = respawnDelay > 0
 
             if (INSTANCE.config.getBoolean("rebirth.enable") && respawnDelayIsPositive) {
@@ -105,7 +104,8 @@ class PreventDeathHandler(val player: Player, cause: DamageCause?) {
                 cooldown[player.name] = 0
                 // Call the respawn event.
                 Bukkit.getPluginManager().callEvent(
-                    PlayerRespawnEvent(player, INSTANCE.respawn!!, false, false, false,
+                    PlayerRespawnEvent(
+                        player, INSTANCE.respawn!!, false, false, false,
                         PlayerRespawnEvent.RespawnReason.PLUGIN
                     )
                 )

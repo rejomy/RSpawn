@@ -1,6 +1,5 @@
 package me.rejomy.rspawn.task
 
-import com.google.common.collect.ImmutableSet
 import me.rejomy.rspawn.INSTANCE
 import me.rejomy.rspawn.antirelog
 import me.rejomy.rspawn.listener.cooldown
@@ -22,7 +21,7 @@ class RespawnTask(
 
     override fun run() {
         // If player not in the server for any reason, stop scheduler.
-        // We will run it again if he join back with his cached cooldown.
+        // We will run it again if he joins back with his cached cooldown.
         if (!player.isOnline) {
             task?.cancel()
         } else if (--delay < 1) {
@@ -38,12 +37,13 @@ class RespawnTask(
 
             // Call the respawn event.
             Bukkit.getPluginManager().callEvent(
-                PlayerRespawnEvent(player, INSTANCE.respawn!!, false, false, false,
+                PlayerRespawnEvent(player, INSTANCE.respawn!!,
+                    false, false, false,
                     PlayerRespawnEvent.RespawnReason.PLUGIN
                 )
             )
 
-            // Reset fall distance to prevent accident deaths if player have some
+            // Do not allow server to damage player if he was failing
             player.fallDistance = 0F
             Utils.teleportToRespawn(player)
             PlayerUtil.resetVariables(player)
